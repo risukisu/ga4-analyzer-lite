@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GA4 Analyzer Lite</title>
+    <style>
+        :root {
+            --bg-body: #FFFFFF;
+            --bg-subtle: #F9FAFB;
+            --bg-element: #FFFFFF;
+            --text-main: #111827;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+            --accent-color: #2563EB;
+            --focus-ring: #111827;
+            --radius: 6px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --green: #059669;
+            --red: #EF4444;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-body);
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3 { font-weight: 600; letter-spacing: -0.025em; }
+
+        header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        header .title {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            color: var(--text-main);
+        }
+
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+            font-family: var(--font-family);
+            cursor: pointer;
+            transition: opacity 0.15s;
+            border: 1px solid transparent;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+        .btn-secondary { background: transparent; color: var(--text-main); border-color: var(--border-color); }
+        .btn-secondary:hover { border-color: var(--text-secondary); }
+
+        .section { margin-bottom: 24px; }
+        .section-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .upload-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius);
+            padding: 48px 24px;
+            text-align: center;
+            transition: border-color 0.2s, background 0.2s;
+            cursor: pointer;
+        }
+        .upload-zone.dragover { border-color: var(--accent-color); background: #2563EB08; }
+        .upload-zone.collapsed {
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: default;
+        }
+        .upload-zone p { color: var(--text-secondary); margin: 8px 0; font-size: 13px; }
+        .upload-zone .hint { font-size: 12px; color: var(--text-secondary); }
+
+        .file-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .file-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .file-chip .type-badge {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        .file-chip .type-badge.pages { background: #DBEAFE; color: #1D4ED8; }
+        .file-chip .type-badge.engagement { background: #D1FAE5; color: #065F46; }
+        .file-chip .type-badge.unknown { background: #FEE2E2; color: #991B1B; }
+        .file-chip .remove { cursor: pointer; color: var(--text-secondary); font-size: 16px; line-height: 1; }
+        .file-chip .remove:hover { color: var(--red); }
+        .file-chip select {
+            font-size: 12px; padding: 2px 4px; border: 1px solid var(--border-color);
+            border-radius: 3px; font-family: var(--font-family); background: var(--bg-element);
+        }
+
+        .kpi-row { display: flex; gap: 16px; flex-wrap: wrap; }
+        .kpi-card {
+            flex: 1;
+            min-width: 180px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        .kpi-card .label { font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .kpi-card .value { font-size: 24px; font-weight: 600; letter-spacing: -0.025em; color: var(--text-main); }
+        .kpi-card .detail { font-size: 12px; margin-top: 4px; color: var(--text-secondary); }
+        .kpi-card .change-up { color: var(--green); font-weight: 600; }
+        .kpi-card .change-down { color: var(--red); font-weight: 600; }
+
+        .chart-container {
+            background: var(--bg-element);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+        .chart-container canvas { max-height: 1200px; }
+
+        .date-range-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+        .date-range-bar label { color: var(--text-secondary); font-weight: 500; }
+        .date-range-bar input[type="date"] {
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-family: var(--font-family);
+            font-size: 13px;
+            background: var(--bg-element);
+            color: var(--text-main);
+        }
+        .date-range-bar input[type="date"]:focus { border-color: var(--focus-ring); outline: none; }
+
+        .timeline-empty {
+            padding: 32px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13px;
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius);
+        }
+
+        .pages-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .pages-table thead { position: sticky; top: 0; z-index: 1; }
+        .pages-table th {
+            background: var(--bg-subtle);
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .pages-table th:hover { color: var(--text-main); }
+        .pages-table th.num, .pages-table td.num { text-align: right; }
+        .pages-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+        .pages-table tr:nth-child(even) td { background: var(--bg-subtle); }
+        .pages-table .page-path { max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pages-table .sort-arrow { font-size: 10px; margin-left: 4px; }
+
+        main.empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        main.empty-state .upload-zone { width: 100%; max-width: 500px; }
+
+        /* -- Insights -- */
+        .insights-card {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        .insights-card ul { list-style: none; padding: 0; }
+        .insights-card li { padding: 6px 0; font-size: 13px; display: flex; align-items: baseline; gap: 8px; }
+        .insights-card li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+        .insights-card li.neg::before { background: var(--red); }
+        .insights-card li.pos::before { background: var(--green); }
+        .insights-card li.info::before { background: var(--text-secondary); }
+
+        /* -- Winners & Losers -- */
+        .wl-row { display: flex; gap: 16px; }
+        .wl-panel {
+            flex: 1;
+            min-width: 0;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        .wl-panel h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 8px; }
+        .wl-item { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; font-size: 13px; border-bottom: 1px solid var(--border-color); }
+        .wl-item:last-child { border-bottom: none; }
+        .wl-item .path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 12px; }
+        .wl-item .views { color: var(--text-secondary); margin-right: 8px; white-space: nowrap; }
+
+        /* -- Impact Table -- */
+        .impact-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .impact-table th {
+            background: var(--bg-subtle); padding: 10px 12px; text-align: left;
+            font-weight: 500; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); white-space: nowrap;
+        }
+        .impact-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
+        .impact-table td.num { text-align: right; }
+        .impact-table tr:nth-child(even) td { background: var(--bg-subtle); }
+
+        /* -- Decay badge -- */
+        .decay-badge { font-size: 10px; color: var(--red); font-weight: 700; margin-left: 4px; }
+        .growth-badge { font-size: 10px; color: var(--green); font-weight: 700; margin-left: 4px; }
+        .ann-mark { color: var(--accent-color); font-weight: 700; cursor: help; }
+
+
+        @media (max-width: 640px) {
+            header { padding: 0 16px; }
+            main { padding: 16px; }
+            .kpi-row { gap: 8px; }
+            .kpi-card { min-width: 140px; padding: 12px 16px; }
+            .kpi-card .value { font-size: 20px; }
+            .date-range-bar { gap: 8px; }
+            .upload-zone { padding: 32px 16px; }
+            .wl-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display:flex;align-items:baseline;gap:12px">
+            <span class="title">GA4 Analyzer Lite</span>
+            <a href="https://github.com/risukisu/ga4-analyzer" target="_blank" style="font-size:12px;color:var(--text-secondary);text-decoration:none;font-weight:500">Full version →</a>
+        </div>
+        <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary" id="btn-copy" style="display:none" onclick="app.copyReport()">Copy Report</button>
+            <button class="btn btn-secondary" id="btn-clear" style="display:none" onclick="app.clearAll()">Clear All</button>
+        </div>
+    </header>
+    <main>
+        <div id="upload-zone" class="section">
+            <div class="upload-zone" id="drop-zone">
+                <div id="upload-full">
+                    <p style="font-size:16px;font-weight:600;color:var(--text-main)">Drop GA4 CSV exports here</p>
+                    <p style="max-width:480px;margin:8px auto;text-align:left;font-size:13px;color:var(--text-secondary);line-height:1.6">
+                        In GA4, go to <strong style="color:var(--text-main)">Reports → User engagement &amp; retention</strong>.<br>
+                        For each year you want to compare:<br>
+                        <span style="margin-left:12px">1. Set date range to one year (e.g. Jan 1 – Dec 31, 2024)</span><br>
+                        <span style="margin-left:12px">2. Open <strong style="color:var(--text-main)">Pages and screens</strong> → share icon (↗) → Download CSV</span><br>
+                        <span style="margin-left:12px">3. Open <strong style="color:var(--text-main)">Overview</strong> → share icon (↗) → Download CSV</span><br>
+                        <span style="margin-left:12px">4. Change year and repeat</span><br>
+                        Then drop all CSV files here at once.
+                    </p>
+                    <input type="file" id="file-input" multiple accept=".csv" style="display:none">
+                    <button class="btn btn-primary" style="margin-top:12px" onclick="document.getElementById('file-input').click()">Choose Files</button>
+                </div>
+                <div id="upload-collapsed" style="display:none">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+                        <div class="file-chips" id="file-chips"></div>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()">+ Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="year-filter" style="margin-top:8px;display:none;align-items:center;gap:8px">
+                <span style="font-size:12px;font-weight:500;color:var(--text-secondary)">Years:</span>
+                <select id="year-select" style="font-size:13px;font-family:var(--font-family);padding:4px 8px;border:1px solid var(--border-color);border-radius:var(--radius);background:var(--bg-element);color:var(--text-main)"></select>
+            </div>
+        </div>
+        <div id="kpi-cards" class="section" style="display:none">
+            <div class="kpi-row" id="kpi-row"></div>
+        </div>
+        <div id="insights-section" class="section" style="display:none"></div>
+        <div id="timeline-section" class="section" style="display:none">
+            <div class="section-title">Traffic Timeline</div>
+            <div id="timeline-content"></div>
+        </div>
+        <div id="impact-section" class="section" style="display:none"></div>
+        <div id="winners-losers" class="section" style="display:none"></div>
+        <div id="table-section" class="section" style="display:none">
+            <div class="section-title">Top Pages</div>
+            <div style="overflow-x:auto; border:1px solid var(--border-color); border-radius:var(--radius); box-shadow:var(--shadow-sm)">
+                <table class="pages-table" id="pages-table"></table>
+            </div>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+/* ── STATE ── */
+const state = {
+    files: [],
+    sortCol: null,
+    sortDir: 'desc',
+    selectedYears: null,  // null = all, or Set of selected years
+};
+
+let chartInstance = null;
+
+/* ── SERP EVENTS DATABASE ── */
+/* To add new events: append to this array. Use type 'google' for Core/Spam Updates, 'aio' for AI Overviews. */
+const SERP_EVENTS = [
+    // 2023
+    { name: 'March 2023 Core Update', date: '2023-03-15', end: '2023-03-28', type: 'google', desc: 'Broad core update improving search quality signals' },
+    { name: 'August 2023 Core Update', date: '2023-08-22', end: '2023-09-07', type: 'google', desc: 'Core ranking update focused on content quality' },
+    { name: 'October 2023 Core Update', date: '2023-10-05', end: '2023-10-19', type: 'google', desc: 'Core update with spam detection improvements' },
+    { name: 'November 2023 Core Update', date: '2023-11-02', end: '2023-11-28', type: 'google', desc: 'Broad core update ahead of holiday season' },
+    // 2024
+    { name: 'March 2024 Core Update', date: '2024-03-05', end: '2024-04-19', type: 'google', desc: 'Absorbed Helpful Content System; 45% cut in low-quality content' },
+    { name: 'AI Overviews: US Launch', date: '2024-05-14', type: 'aio', desc: 'Google rebrands SGE as AI Overviews, launches in US search' },
+    { name: 'August 2024 Core Update', date: '2024-08-15', end: '2024-09-03', type: 'google', desc: 'Core update targeting content authenticity and expertise' },
+    { name: 'AI Overviews: Global Expansion', date: '2024-10-28', type: 'aio', desc: 'AI Overviews expand to 100+ countries' },
+    { name: 'December 2024 Core Update', date: '2024-12-12', end: '2024-12-18', type: 'google', desc: 'Rapid core update focused on freshness signals' },
+    // 2025
+    { name: 'AI Overviews: Links Redesign', date: '2025-01-09', type: 'aio', desc: 'New AI Overviews layout with inline source links' },
+    { name: 'March 2025 Core Update', date: '2025-03-13', end: '2025-03-27', type: 'google', desc: 'Broad core update improving content expertise signals' },
+    { name: 'AI Mode Launch', date: '2025-03-25', type: 'aio', desc: 'Google launches AI Mode as a dedicated search experience' },
+    { name: 'June 2025 Core Update', date: '2025-06-30', end: '2025-07-17', type: 'google', desc: 'Core update; 16-day rollout' },
+    { name: 'August 2025 Spam Update', date: '2025-08-26', end: '2025-09-22', type: 'google', desc: 'Spam update targeting link spam and manipulative practices; 27-day rollout' },
+    { name: 'December 2025 Core Update', date: '2025-12-11', end: '2025-12-29', type: 'google', desc: 'Core update; 18-day rollout through holiday season' },
+    // 2026
+    { name: 'AI Overviews: Gemini 3', date: '2026-01-27', type: 'aio', desc: 'AI Overviews upgraded to Gemini 3; triggers on 48% of searches, 1200px+ height' },
+    { name: 'February 2026 Discover Update', date: '2026-02-05', type: 'google', desc: 'Discover-specific core update for US English feed recommendations' },
+    { name: 'March 2026 Spam Update', date: '2026-03-24', type: 'google', desc: 'First spam update since August 2025' },
+    { name: 'March 2026 Core Update', date: '2026-03-27', type: 'google', desc: 'Broad core update, currently rolling out' },
+];
+
+function mapEventsToLabels(labels) {
+    const eventY = new Array(labels.length).fill(null);
+    const eventLabels = new Array(labels.length).fill('');
+    const eventTypes = new Array(labels.length).fill('');
+    const eventDescs = new Array(labels.length).fill('');
+
+    for (const event of SERP_EVENTS) {
+        let bestIdx = -1, bestDist = Infinity;
+        for (let i = 0; i < labels.length; i++) {
+            const dist = Math.abs(new Date(labels[i]) - new Date(event.date));
+            if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+        }
+        const twoWeeksMs = 14 * 24 * 60 * 60 * 1000;
+        if (bestIdx >= 0 && bestDist <= twoWeeksMs) {
+            eventLabels[bestIdx] = event.name;
+            eventTypes[bestIdx] = event.type;
+            eventDescs[bestIdx] = event.desc;
+            eventY[bestIdx] = 'PLACEHOLDER';
+        }
+    }
+    return { eventY, eventLabels, eventTypes, eventDescs };
+}
+
+const eventLinesPlugin = {
+    id: 'eventLines',
+    afterDraw(chart) {
+        const evtDatasetIdx = chart.data.datasets.findIndex(ds => ds.label === 'Events');
+        if (evtDatasetIdx < 0) return;
+        const meta = chart.getDatasetMeta(evtDatasetIdx);
+        const ctx = chart.ctx;
+        meta.data.forEach((pt, i) => {
+            if (chart.data.datasets[evtDatasetIdx].data[i] === null) return;
+            ctx.save();
+            ctx.beginPath();
+            ctx.setLineDash([3, 3]);
+            const t = chart.data.datasets[evtDatasetIdx].eventTypes?.[i];
+            ctx.strokeStyle = t === 'aio' ? '#05966944' : '#f59e0b44';
+            ctx.lineWidth = 1;
+            ctx.moveTo(pt.x, chart.chartArea.top);
+            ctx.lineTo(pt.x, chart.chartArea.bottom);
+            ctx.stroke();
+            ctx.restore();
+        });
+    }
+};
+
+/* ── CSV PARSER ── */
+function parseCsvLine(line) {
+    const fields = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+            if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
+            else inQuotes = !inQuotes;
+        } else if (ch === ',' && !inQuotes) {
+            fields.push(current); current = '';
+        } else {
+            current += ch;
+        }
+    }
+    fields.push(current);
+    return fields;
+}
+
+function parseSections(csvText) {
+    const text = csvText.startsWith('\uFEFF') ? csvText.slice(1) : csvText;
+    const lines = text.split('\n');
+    const sections = [];
+    let i = 0;
+    while (i < lines.length) {
+        const line = lines[i].trim();
+        if (!line || line.startsWith('#')) { i++; continue; }
+        const headers = parseCsvLine(line);
+        i++;
+        const rows = [];
+        while (i < lines.length) {
+            const dl = lines[i].trim();
+            if (!dl || dl.startsWith('#')) break;
+            rows.push(parseCsvLine(dl));
+            i++;
+        }
+        sections.push({ headers, rows });
+    }
+    return sections;
+}
+
+function parseNum(str) {
+    if (!str) return 0;
+    return parseFloat(str.replace(/,/g, '').replace(/"/g, '')) || 0;
+}
+
+/* ── CSV TYPE DETECTION ── */
+function detectCsvType(headers) {
+    const h = headers.map(s => s.toLowerCase().trim());
+    if (h.some(c => c.includes('page path')) && h.some(c => c.includes('views'))) return 'pages';
+    if (h.some(c => c.includes('nth week') || c.includes('nth day')) && h.some(c => c.includes('active users'))) return 'engagement';
+    return 'unknown';
+}
+
+function extractPagesData(sections) {
+    for (const sec of sections) {
+        if (detectCsvType(sec.headers) !== 'pages') continue;
+        const h = sec.headers.map(s => s.toLowerCase().trim());
+        const iPath = h.findIndex(c => c.includes('page path'));
+        const iViews = h.findIndex(c => c.includes('views') && !c.includes('per'));
+        const iUsers = h.findIndex(c => c.includes('active users'));
+        const iEng = h.findIndex(c => c.includes('average engagement time'));
+        if (iPath < 0 || iViews < 0) continue;
+        return sec.rows.map(row => ({
+            path: row[iPath] || '',
+            views: parseNum(row[iViews]),
+            users: iUsers >= 0 ? parseNum(row[iUsers]) : null,
+            engagement: iEng >= 0 ? parseNum(row[iEng]) : null,
+        }));
+    }
+    return null;
+}
+
+function extractEngagementData(sections) {
+    for (const sec of sections) {
+        if (detectCsvType(sec.headers) !== 'engagement') continue;
+        const h = sec.headers.map(s => s.toLowerCase().trim());
+        const iOffset = h.findIndex(c => c.includes('nth week') || c.includes('nth day'));
+        const iUsers = h.findIndex(c => c.includes('active users'));
+        if (iOffset < 0 || iUsers < 0) continue;
+        const isDaily = h[iOffset].includes('nth day');
+        const entries = sec.rows.map(row => ({
+            offset: parseInt(row[iOffset], 10) || 0,
+            users: parseNum(row[iUsers]),
+        }));
+        entries._isDaily = isDaily; // also stored on file entry for persistence
+        return entries;
+    }
+    return null;
+}
+
+function detectYear(filename) {
+    const m = filename.match(/(20\d{2})/);
+    return m ? parseInt(m[1], 10) : null;
+}
+
+function extractDatesFromComments(csvText) {
+    const text = csvText.startsWith('\uFEFF') ? csvText.slice(1) : csvText;
+    const lines = text.split('\n');
+    let startDate = null, endDate = null;
+    for (const line of lines) {
+        if (!line.trim().startsWith('#')) continue;
+        const isStart = /start date/i.test(line);
+        const isEnd = /end date/i.test(line);
+        if (!isStart && !isEnd) continue;
+        let d = null;
+        const dashMatch = line.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+        if (dashMatch) d = new Date(Date.UTC(+dashMatch[1], +dashMatch[2] - 1, +dashMatch[3]));
+        const compactMatch = line.match(/(?:Start date|End date|start date|end date)[:\s]+(\d{4})(\d{2})(\d{2})/);
+        if (!d && compactMatch) d = new Date(Date.UTC(+compactMatch[1], +compactMatch[2] - 1, +compactMatch[3]));
+        if (d && isStart && !startDate) startDate = d;
+        if (d && isEnd && !endDate) endDate = d;
+    }
+    return { startDate, endDate };
+}
+
+function extractBaseDateFromComments(csvText) {
+    return extractDatesFromComments(csvText).startDate;
+}
+
+/* ── FILE UPLOAD ── */
+let fileIdCounter = 0;
+
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e => { handleFiles(e.target.files); e.target.value = ''; });
+
+function handleFiles(fileList) {
+    for (const file of fileList) {
+        if (!file.name.endsWith('.csv')) continue;
+        const reader = new FileReader();
+        reader.onload = () => processFile(file.name, reader.result);
+        reader.readAsText(file);
+    }
+}
+
+function processFile(name, text) {
+    const sections = parseSections(text);
+    if (!sections.length) return;
+
+    const type = detectCsvType(sections[0].headers);
+    let year = detectYear(name);
+    let parsed = null;
+
+    if (type === 'pages') {
+        parsed = extractPagesData(sections);
+    } else if (type === 'engagement') {
+        parsed = extractEngagementData(sections);
+    } else {
+        // Unknown type — still add so user sees the chip
+        const entry = { id: ++fileIdCounter, name, year: null, type: 'unknown', data: text, parsed: null };
+        state.files.push(entry);
+        onFilesChanged();
+        return;
+    }
+
+    // Extract dates from comments
+    const { startDate: baseDate, endDate } = extractDatesFromComments(text);
+    if (!year && baseDate) year = baseDate.getUTCFullYear();
+    const daysCovered = (baseDate && endDate) ? Math.round((endDate - baseDate) / 86400000) + 1 : 365;
+    const isDaily = (parsed && parsed._isDaily) || false;
+    const entry = { id: ++fileIdCounter, name, year, type, data: text, parsed, baseDate, isDaily, daysCovered };
+    state.files.push(entry);
+    onFilesChanged();
+}
+
+function removeFile(id) {
+    state.files = state.files.filter(f => f.id !== id);
+    onFilesChanged();
+}
+
+function onFilesChanged() {
+    const hasFiles = state.files.length > 0;
+    document.getElementById('upload-full').style.display = hasFiles ? 'none' : '';
+    document.getElementById('upload-collapsed').style.display = hasFiles ? '' : 'none';
+    document.getElementById('btn-clear').style.display = hasFiles ? '' : 'none';
+    if (hasFiles) dropZone.classList.add('collapsed');
+    else dropZone.classList.remove('collapsed');
+    document.querySelector('main').classList.toggle('empty-state', !hasFiles);
+    renderFileChips();
+    renderYearFilter();
+    renderDashboard();
+}
+
+function renderFileChips() {
+    const container = document.getElementById('file-chips');
+    container.innerHTML = state.files.map(f => {
+        const badge = f.type === 'pages' ? '<span class="type-badge pages">Pages</span>'
+            : f.type === 'engagement' ? '<span class="type-badge engagement">Engagement</span>'
+            : '<span class="type-badge unknown">Unknown</span>';
+        const yearLabel = f.year ? `<span style="color:var(--text-secondary)">${f.year}</span>` : '';
+        return `<span class="file-chip">${badge} ${esc(f.name)} ${yearLabel} <span class="remove" onclick="removeFile(${f.id})">&times;</span></span>`;
+    }).join('');
+}
+
+function renderYearFilter() {
+    const allYears = [...new Set(state.files.map(f => f.year).filter(Boolean))].sort();
+    const container = document.getElementById('year-filter');
+    const select = document.getElementById('year-select');
+
+    if (allYears.length < 2) {
+        container.style.display = 'none';
+        state.selectedYears = null;
+        return;
+    }
+
+    if (!state.selectedYears) state.selectedYears = new Set(allYears);
+    for (const y of allYears) state.selectedYears.add(y);
+
+    container.style.display = 'flex';
+    const currentVal = state.selectedYears.size === allYears.length ? 'all' : [...state.selectedYears][0].toString();
+    select.innerHTML = `<option value="all">All years</option>` +
+        allYears.map(y => `<option value="${y}">${y} only</option>`).join('');
+    select.value = currentVal;
+
+    select.onchange = function() {
+        if (this.value === 'all') {
+            state.selectedYears = new Set(allYears);
+        } else {
+            state.selectedYears = new Set([parseInt(this.value, 10)]);
+        }
+        try { renderDashboard(); } catch (e) { console.error('renderDashboard error:', e); }
+    };
+}
+
+function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+/* ── APP ── */
+const app = {
+    clearAll() {
+        state.files = [];
+        state.selectedYears = null;
+        if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+        sessionStorage.removeItem('ga4_analyzer_lite');
+        onFilesChanged();
+    },
+    copyReport() {
+        const pages = getPagesByYear();
+        let md = '# GA4 Analysis\n\n';
+
+        const insightsEl = document.querySelector('.insights-card ul');
+        if (insightsEl) {
+            md += '## Key Insights\n\n';
+            insightsEl.querySelectorAll('li').forEach(li => { md += '- ' + li.textContent.trim() + '\n'; });
+            md += '\n';
+        }
+
+        const impactRows = document.querySelectorAll('.impact-table tbody tr');
+        if (impactRows.length) {
+            md += '## Algorithm Impact\n\n';
+            md += '| Event | Date | Before | After | Impact |\n|-------|------|--------|-------|--------|\n';
+            impactRows.forEach(tr => {
+                const cells = tr.querySelectorAll('td');
+                md += `| ${cells[0].textContent.trim()} | ${cells[1].textContent.trim()} | ${cells[2].textContent.trim()} | ${cells[3].textContent.trim()} | ${cells[4].textContent.trim()} |\n`;
+            });
+            md += '\n';
+        }
+
+        const wlPanels = document.querySelectorAll('.wl-panel');
+        wlPanels.forEach(panel => {
+            const title = panel.querySelector('h3')?.textContent || '';
+            const items = panel.querySelectorAll('.wl-item');
+            if (items.length) {
+                md += `## ${title}\n\n`;
+                items.forEach(item => {
+                    const path = item.querySelector('.path')?.textContent || '';
+                    const views = item.querySelector('.views')?.textContent || '';
+                    const pct = item.querySelector('[class^="change"]')?.textContent || '';
+                    md += `- ${path} (${views}, ${pct})\n`;
+                });
+                md += '\n';
+            }
+        });
+
+        const table = document.getElementById('pages-table');
+        if (table && table.rows.length > 1) {
+            md += '## Top Pages\n\n';
+            const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent.replace(/[▲▼]/g, '').trim());
+            md += '| ' + headers.join(' | ') + ' |\n';
+            md += '|' + headers.map(() => '---').join('|') + '|\n';
+            Array.from(table.querySelectorAll('tbody tr')).forEach(tr => {
+                const cells = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim());
+                md += '| ' + cells.join(' | ') + ' |\n';
+            });
+        }
+
+        navigator.clipboard.writeText(md).then(() => {
+            const btn = document.getElementById('btn-copy');
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = orig; }, 1500);
+        });
+    }
+};
+
+function renderDashboard() {
+    const pages = getPagesByYear();
+    const engagement = getEngagementData();
+    const hasPages = Object.keys(pages).length > 0;
+    const hasEngagement = engagement.length > 0;
+
+    document.getElementById('kpi-cards').style.display = hasPages ? '' : 'none';
+    document.getElementById('insights-section').style.display = 'none';
+    document.getElementById('timeline-section').style.display = hasEngagement || hasPages ? '' : 'none';
+    document.getElementById('impact-section').style.display = 'none';
+    document.getElementById('winners-losers').style.display = 'none';
+    document.getElementById('table-section').style.display = hasPages ? '' : 'none';
+
+    // Show/hide header buttons
+    document.getElementById('btn-copy').style.display = hasPages ? '' : 'none';
+
+    if (hasPages) {
+        renderKPIs(pages);
+        renderInsights(pages, engagement);
+        renderWinnersLosers(pages);
+        renderTable(pages);
+    }
+    if (hasEngagement) {
+        renderTimeline(engagement);
+        renderAlgorithmImpact();
+    } else if (hasPages) {
+        document.getElementById('timeline-content').innerHTML =
+            '<div class="timeline-empty">Upload an Engagement overview CSV to see the weekly traffic timeline</div>';
+    }
+
+    saveSession();
+}
+
+function getPagesByYear() {
+    const result = {};
+    for (const f of state.files) {
+        if (f.type === 'pages' && f.year && f.parsed) {
+            if (state.selectedYears && !state.selectedYears.has(f.year)) continue;
+            result[f.year] = f.parsed;
+        }
+    }
+    return result;
+}
+
+function getYearDays() {
+    const result = {};
+    for (const f of state.files) {
+        if (f.type === 'pages' && f.year) result[f.year] = f.daysCovered || 365;
+    }
+    return result;
+}
+
+function isPartialYear(year) {
+    const days = getYearDays();
+    return (days[year] || 365) < 350;
+}
+
+function annualize(views, year) {
+    const days = getYearDays();
+    const d = days[year] || 365;
+    return d < 350 ? Math.round(views * 365 / d) : views;
+}
+
+function yearLabel(year) {
+    const days = getYearDays();
+    const d = days[year] || 365;
+    return d < 350 ? `${year} (${d}d)` : `${year}`;
+}
+
+function getEngagementData() {
+    return state.files.filter(f => f.type === 'engagement' && f.parsed);
+}
+
+function renderKPIs(pages) {
+    const years = Object.keys(pages).map(Number).sort();
+    const latest = years[years.length - 1];
+    const prev = years.length > 1 ? years[years.length - 2] : null;
+
+    const latestPages = pages[latest];
+    const totalViewsRaw = latestPages.reduce((s, p) => s + p.views, 0);
+    const totalViews = annualize(totalViewsRaw, latest);
+    const topPage = latestPages.reduce((best, p) => p.views > best.views ? p : best, { path: '—', views: 0 });
+    const uniquePaths = new Set();
+    for (const y of years) pages[y].forEach(p => uniquePaths.add(p.path));
+
+    let cards = [
+        kpiCard('Total Views', fmt(totalViews), prev ? changeHtml(totalViews, annualize(pages[prev].reduce((s, p) => s + p.views, 0), prev)) : yearLabel(latest)),
+        kpiCard('Top Page', topPage.path.length > 30 ? topPage.path.slice(0, 30) + '…' : topPage.path, fmt(topPage.views) + ' views'),
+        kpiCard('Pages Tracked', uniquePaths.size.toLocaleString(), years.length > 1 ? `Across ${years.length} years` : yearLabel(latest)),
+    ];
+
+    if (prev) {
+        const prevTotal = annualize(pages[prev].reduce((s, p) => s + p.views, 0), prev);
+        const pctChange = prevTotal > 0 ? ((totalViews - prevTotal) / prevTotal * 100) : 0;
+        const cls = pctChange >= 0 ? 'change-up' : 'change-down';
+        const sign = pctChange >= 0 ? '+' : '';
+        const annMark = (isPartialYear(latest) || isPartialYear(prev)) ? '<span class="ann-mark" title="Annualized: partial year projected to 365 days for comparison">*</span>' : '';
+        cards.push(kpiCard('YoY Change', `<span class="${cls}">${sign}${pctChange.toFixed(1)}%${annMark}</span>`, `${yearLabel(prev)} → ${yearLabel(latest)}`));
+    }
+
+    const hasPartial = years.some(y => isPartialYear(y));
+    const footnote = hasPartial ? '<div style="font-size:11px;color:var(--text-secondary);margin-top:8px">View counts are actual data. Change %, arrows, insights and winners/losers <span style="color:var(--accent-color);font-weight:600">use annualized values for partial years*</span> to enable fair comparison.</div>' : '';
+    document.getElementById('kpi-row').innerHTML = cards.join('') + footnote;
+}
+
+function kpiCard(label, value, detail) {
+    return `<div class="kpi-card"><div class="label">${label}</div><div class="value">${value}</div><div class="detail">${detail}</div></div>`;
+}
+
+function changeHtml(current, previous) {
+    if (!previous) return '';
+    const pct = ((current - previous) / previous * 100).toFixed(1);
+    const cls = pct >= 0 ? 'change-up' : 'change-down';
+    const sign = pct >= 0 ? '+' : '';
+    return `<span class="${cls}">${sign}${pct}%</span> vs prev year`;
+}
+
+function renderTable(pages) {
+    const years = Object.keys(pages).map(Number).sort();
+    const latest = years[years.length - 1];
+    const earliest = years[0];
+
+    // Merge pages across years by path — raw values for display
+    const merged = {};
+    for (const y of years) {
+        for (const p of pages[y]) {
+            if (!merged[p.path]) merged[p.path] = { path: p.path, engagement: null };
+            merged[p.path]['v' + y] = p.views;
+            if (p.engagement !== null) merged[p.path].engagement = p.engagement;
+        }
+    }
+
+    let rows = Object.values(merged);
+
+    // Compute change: latest year vs previous year using ANNUALIZED values
+    const prev = years.length > 1 ? years[years.length - 2] : null;
+    if (prev) {
+        for (const row of rows) {
+            const vLatest = annualize(row['v' + latest] || 0, latest);
+            const vPrev = annualize(row['v' + prev] || 0, prev);
+            // Detect "new" pages: low baseline AND disproportionate jump
+            if (vPrev < 100 && vLatest > vPrev * 3) {
+                row.change = null;
+                row.isNew = true;
+            } else if (vPrev > 0) {
+                row.change = ((vLatest - vPrev) / vPrev * 100);
+            } else {
+                row.change = null;
+            }
+        }
+    }
+
+    // Detect content decay/growth using annualized values (same as Change column)
+    if (prev) {
+        for (const row of rows) {
+            const vl = annualize(row['v' + latest] || 0, latest);
+            const vp = annualize(row['v' + prev] || 0, prev);
+            row.decaying = false;
+            row.growing = false;
+            if (vp < 100 && vl > vp * 3) continue;
+            if (vp <= 0) continue;
+            if (vl < vp * 0.85) row.decaying = true;
+            if (vl > vp * 1.15) row.growing = true;
+        }
+    }
+
+    // Sort
+    if (!state.sortCol) state.sortCol = 'v' + latest;
+    const sortCol = state.sortCol;
+    const dir = state.sortDir === 'asc' ? 1 : -1;
+    rows.sort((a, b) => {
+        let va = sortCol === 'path' ? a.path : (sortCol === 'change' ? (a.change ?? -Infinity) : (a[sortCol] || 0));
+        let vb = sortCol === 'path' ? b.path : (sortCol === 'change' ? (b.change ?? -Infinity) : (b[sortCol] || 0));
+        if (typeof va === 'string') return dir * va.localeCompare(vb);
+        return dir * (va - vb);
+    });
+
+    // Take top 25
+    rows = rows.slice(0, 25);
+
+    // Build header
+    const arrow = col => state.sortCol === col ? (state.sortDir === 'asc' ? ' ▲' : ' ▼') : '';
+    let thead = '<thead><tr><th>#</th>';
+    thead += `<th onclick="sortTable('path')">Page<span class="sort-arrow">${arrow('path')}</span></th>`;
+    for (const y of years) {
+        thead += `<th class="num" onclick="sortTable('v${y}')">Views ${yearLabel(y)}<span class="sort-arrow">${arrow('v' + y)}</span></th>`;
+    }
+    if (years.length > 1) {
+        const annNote = isPartialYear(latest) || isPartialYear(prev) ? ' Partial years are annualized (projected to 365 days) for fair comparison.' : '';
+        thead += `<th class="num" onclick="sortTable('change')" title="Year-over-year change: ${yearLabel(prev)} → ${yearLabel(latest)}.${annNote} Pages with &lt;100 views in ${prev} that jumped 3x+ are marked 'New'.">Change (${prev}→${latest})<span class="sort-arrow">${arrow('change')}</span></th>`;
+    }
+    const hasEngagement = rows.some(r => r.engagement !== null);
+    if (hasEngagement) {
+        thead += `<th class="num" onclick="sortTable('engagement')">Engagement<span class="sort-arrow">${arrow('engagement')}</span></th>`;
+    }
+    thead += '</tr></thead>';
+
+    // Build body
+    let tbody = '<tbody>';
+    rows.forEach((row, i) => {
+        tbody += '<tr>';
+        tbody += `<td style="text-align:center;color:var(--text-secondary)">${i + 1}</td>`;
+        const badge = row.decaying ? `<span class="decay-badge" title="Down 15%+ from ${prev} to ${latest}">↓↓</span>`
+            : row.growing ? `<span class="growth-badge" title="Up 15%+ from ${prev} to ${latest}">↑↑</span>` : '';
+        tbody += `<td class="page-path" title="${esc(row.path)}">${esc(row.path)}${badge}</td>`;
+        for (const y of years) {
+            tbody += `<td class="num">${(row['v' + y] || 0).toLocaleString()}</td>`;
+        }
+        if (years.length > 1) {
+            if (row.isNew) {
+                tbody += '<td class="num" style="color:var(--text-secondary);font-style:italic">New</td>';
+            } else if (row.change !== null) {
+                const cls = row.change >= 0 ? 'change-up' : 'change-down';
+                const sign = row.change >= 0 ? '+' : '';
+                const ann = (isPartialYear(latest) || isPartialYear(prev)) ? '<span class="ann-mark" title="Annualized: partial year projected to 365 days for comparison">*</span>' : '';
+                tbody += `<td class="num"><span class="${cls}">${sign}${row.change.toFixed(1)}%${ann}</span></td>`;
+            } else {
+                tbody += '<td class="num" style="color:var(--text-secondary)">—</td>';
+            }
+        }
+        if (hasEngagement) {
+            if (row.engagement !== null) {
+                const mins = Math.floor(row.engagement / 60);
+                const secs = Math.round(row.engagement % 60);
+                tbody += `<td class="num">${mins > 0 ? mins + 'm ' : ''}${secs}s</td>`;
+            } else {
+                tbody += '<td class="num" style="color:var(--text-secondary)">—</td>';
+            }
+        }
+        tbody += '</tr>';
+    });
+    tbody += '</tbody>';
+
+    document.getElementById('pages-table').innerHTML = thead + tbody;
+}
+
+function sortTable(col) {
+    if (state.sortCol === col) {
+        state.sortDir = state.sortDir === 'desc' ? 'asc' : 'desc';
+    } else {
+        state.sortCol = col;
+        state.sortDir = col === 'path' ? 'asc' : 'desc';
+    }
+    const pages = getPagesByYear();
+    if (Object.keys(pages).length) renderTable(pages);
+}
+
+const YEAR_COLORS = ['#f59e0b', '#06b6d4', '#a78bfa'];
+const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+function weekToDate(baseDate, weekOffset) {
+    return new Date(baseDate.getTime() + weekOffset * MS_PER_WEEK);
+}
+
+function movingAvg(arr, w, originals) {
+    return arr.map((_, i) => {
+        const start = Math.max(0, i - w + 1);
+        const slice = [];
+        for (let j = start; j <= i; j++) {
+            if (originals[j] !== null) slice.push(arr[j]);
+        }
+        return slice.length > 0 ? Math.round(slice.reduce((a, b) => a + b, 0) / slice.length) : null;
+    });
+}
+
+function entriesToWeeklyDates(entries, baseDate, isDaily) {
+    // Convert entries (daily or weekly offsets) to {dateKey, users} with weekly granularity
+    const MS_PER_DAY = 24 * 60 * 60 * 1000;
+    if (!isDaily) {
+        // Weekly: offset is week number, convert directly
+        return entries.map(e => ({
+            dateKey: new Date(baseDate.getTime() + e.offset * MS_PER_WEEK).toISOString().slice(0, 10),
+            users: e.users,
+        }));
+    }
+    // Daily: bucket into 7-day weeks starting from baseDate, take average per week
+    const weekBuckets = {};
+    for (const e of entries) {
+        const weekNum = Math.floor(e.offset / 7);
+        if (!weekBuckets[weekNum]) weekBuckets[weekNum] = { sum: 0, count: 0 };
+        weekBuckets[weekNum].sum += e.users;
+        weekBuckets[weekNum].count++;
+    }
+    return Object.entries(weekBuckets).map(([wk, b]) => ({
+        dateKey: new Date(baseDate.getTime() + parseInt(wk, 10) * MS_PER_WEEK).toISOString().slice(0, 10),
+        users: Math.round(b.sum / b.count),
+    }));
+}
+
+function renderTimeline(engagementFiles) {
+    const container = document.getElementById('timeline-content');
+
+    // Group engagement data by year, converting to weekly date keys and clipping to year boundaries
+    const yearData = {};
+    for (const f of engagementFiles) {
+        if (!f.year || !f.parsed) continue;
+        const baseDate = f.baseDate || new Date(Date.UTC(f.year, 0, 1));
+        const isDaily = f.isDaily || false;
+        const entries = f.parsed.filter(e => typeof e.offset === 'number' && typeof e.users === 'number');
+        let weeklyEntries = entriesToWeeklyDates(entries, baseDate, isDaily);
+        // Clip to year boundaries
+        const yearStart = `${f.year}-01-01`;
+        const yearEnd = `${f.year}-12-31`;
+        weeklyEntries = weeklyEntries.filter(e => e.dateKey >= yearStart && e.dateKey <= yearEnd);
+        yearData[f.year] = { baseDate, weeklyEntries, partial: (f.daysCovered || 365) < 350 };
+        console.log(`Timeline: year=${f.year}, daysCovered=${f.daysCovered}, partial=${(f.daysCovered || 365) < 350}, isDaily=${isDaily}, entries=${entries.length}, weeklyEntries=${weeklyEntries.length}, firstDate=${weeklyEntries[0]?.dateKey}, lastDate=${weeklyEntries[weeklyEntries.length-1]?.dateKey}`);
+    }
+
+    const years = Object.keys(yearData).map(Number).sort();
+    if (!years.length) {
+        container.innerHTML = '<div class="timeline-empty">Upload an Engagement overview CSV to see the weekly traffic timeline</div>';
+        return;
+    }
+
+    // Collect all date keys for unified x-axis
+    const allDates = new Set();
+    for (const y of years) {
+        for (const e of yearData[y].weeklyEntries) allDates.add(e.dateKey);
+    }
+    const labels = [...allDates].sort();
+
+    // Build datasets
+    const datasets = [];
+    years.forEach((y, idx) => {
+        const dateMap = {};
+        for (const e of yearData[y].weeklyEntries) dateMap[e.dateKey] = e.users;
+        const values = labels.map(l => dateMap[l] ?? null);
+        const color = YEAR_COLORS[idx % YEAR_COLORS.length];
+        const partial = yearData[y].partial;
+
+        // Real data — always solid
+        datasets.push({
+            label: String(y),
+            data: values,
+            borderColor: color,
+            backgroundColor: color + '14',
+            fill: false,
+            tension: 0.3,
+            pointRadius: 0,
+            borderWidth: 2,
+            spanGaps: true,
+        });
+
+        // Moving average (on real data only)
+        const maValues = values.map(v => v ?? 0);
+        const ma = movingAvg(maValues, 8, values);
+        const maFiltered = values.map((v, i) => v !== null ? ma[i] : null);
+        datasets.push({
+            label: `${y} Trend`,
+            data: maFiltered,
+            borderColor: color + '66',
+            borderDash: [6, 3],
+            borderWidth: 1.5,
+            pointRadius: 0,
+            fill: false,
+            tension: 0.4,
+            spanGaps: true,
+        });
+
+    });
+
+    // Map SERP events onto the label timeline
+    const eventMap = mapEventsToLabels(labels);
+    for (let i = 0; i < labels.length; i++) {
+        if (eventMap.eventY[i] === 'PLACEHOLDER') {
+            let maxVal = null;
+            for (const ds of datasets) {
+                if (ds.label.includes('Trend')) continue;
+                if (ds.data[i] !== null && (maxVal === null || ds.data[i] > maxVal)) maxVal = ds.data[i];
+            }
+            eventMap.eventY[i] = maxVal;
+        }
+    }
+
+    datasets.push({
+        label: 'Events',
+        data: eventMap.eventY,
+        showLine: false,
+        pointRadius: eventMap.eventY.map(v => v !== null ? 7 : 0),
+        pointHoverRadius: 11,
+        pointBackgroundColor: eventMap.eventTypes.map(t => t === 'aio' ? '#059669' : '#fff'),
+        pointBorderColor: eventMap.eventTypes.map(t => t === 'aio' ? '#059669' : '#f59e0b'),
+        pointBorderWidth: 2,
+        pointStyle: eventMap.eventTypes.map(t => t === 'aio' ? 'triangle' : 'circle'),
+        eventTypes: eventMap.eventTypes,
+    });
+    state.eventMap = eventMap;
+
+    // Build date range bar + canvas
+    container.innerHTML = `
+        <div class="date-range-bar" id="date-range-bar">
+            <label>From <input type="date" id="range-start" value="${labels[0]}" min="${labels[0]}" max="${labels[labels.length-1]}"></label>
+            <label>To <input type="date" id="range-end" value="${labels[labels.length-1]}" min="${labels[0]}" max="${labels[labels.length-1]}"></label>
+            <button class="btn btn-primary" onclick="applyDateRange()">Apply</button>
+            <button class="btn btn-secondary" onclick="resetDateRange()">Reset</button>
+        </div>
+        <div class="chart-container">
+            <canvas id="timeline-chart"></canvas>
+        </div>`;
+
+    // Store full data for date range filtering
+    state.fullLabels = labels;
+    state.fullDatasets = datasets;
+    state.yearData = yearData;
+
+    // Read URL params
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('from')) document.getElementById('range-start').value = params.get('from');
+    if (params.has('to')) document.getElementById('range-end').value = params.get('to');
+
+    buildTimelineChart(labels, datasets);
+}
+
+function buildTimelineChart(labels, datasets) {
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(document.getElementById('timeline-chart'), {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: {
+                    labels: {
+                        filter: item => !item.text.includes('Trend') && item.text !== 'Events',
+                        usePointStyle: true,
+                        pointStyleWidth: 12,
+                        font: { size: 12 },
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    filter: item => item.raw !== null,
+                    callbacks: {
+                        label: ctx => {
+                            if (ctx.dataset.label === 'Events') {
+                                const evtLabel = state.eventMap?.eventLabels[ctx.dataIndex];
+                                const evtDesc = state.eventMap?.eventDescs[ctx.dataIndex];
+                                if (evtLabel) return ['\u26A1 ' + evtLabel, evtDesc ? '   ' + evtDesc : ''].filter(Boolean);
+                                return null;
+                            }
+                            if (ctx.dataset.label.includes('Trend')) return 'Trend: ' + Math.round(ctx.parsed.y).toLocaleString();
+                            return ctx.dataset.label + ': ' + (ctx.parsed.y ?? 0).toLocaleString() + ' users';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { ticks: { maxTicksLimit: 14, font: { size: 11 } }, grid: { display: false } },
+                y: { ticks: { callback: v => fmt(v) }, grid: { color: '#E5E7EB' } }
+            }
+        },
+        plugins: [eventLinesPlugin]
+    });
+}
+
+function applyDateRange() {
+    const startVal = document.getElementById('range-start').value;
+    const endVal = document.getElementById('range-end').value;
+    if (!state.fullLabels) return;
+
+    const filtered = [];
+    const filteredDatasets = state.fullDatasets.map(ds => ({ ...ds, data: [] }));
+
+    for (let i = 0; i < state.fullLabels.length; i++) {
+        const d = state.fullLabels[i];
+        if ((!startVal || d >= startVal) && (!endVal || d <= endVal)) {
+            filtered.push(d);
+            filteredDatasets.forEach((ds, j) => ds.data.push(state.fullDatasets[j].data[i]));
+        }
+    }
+
+    // Remap events for filtered range
+    const filteredEventMap = mapEventsToLabels(filtered);
+    const evtDsIdx = filteredDatasets.findIndex(ds => ds.label === 'Events');
+    if (evtDsIdx >= 0) {
+        const refValues = filteredDatasets[0].data;
+        for (let i = 0; i < filtered.length; i++) {
+            if (filteredEventMap.eventY[i] === 'PLACEHOLDER') {
+                filteredEventMap.eventY[i] = refValues[i] ?? null;
+            }
+        }
+        filteredDatasets[evtDsIdx] = {
+            ...filteredDatasets[evtDsIdx],
+            data: filteredEventMap.eventY,
+            pointRadius: filteredEventMap.eventY.map(v => v !== null ? 7 : 0),
+            pointBackgroundColor: filteredEventMap.eventTypes.map(t => t === 'aio' ? '#059669' : '#fff'),
+            pointBorderColor: filteredEventMap.eventTypes.map(t => t === 'aio' ? '#059669' : '#f59e0b'),
+            pointStyle: filteredEventMap.eventTypes.map(t => t === 'aio' ? 'triangle' : 'circle'),
+            eventTypes: filteredEventMap.eventTypes,
+        };
+        state.eventMap = filteredEventMap;
+    }
+
+    // Update URL params
+    const url = new URL(window.location);
+    if (startVal) url.searchParams.set('from', startVal); else url.searchParams.delete('from');
+    if (endVal) url.searchParams.set('to', endVal); else url.searchParams.delete('to');
+    window.history.replaceState({}, '', url);
+
+    buildTimelineChart(filtered, filteredDatasets);
+}
+
+function resetDateRange() {
+    if (!state.fullLabels) return;
+    document.getElementById('range-start').value = state.fullLabels[0];
+    document.getElementById('range-end').value = state.fullLabels[state.fullLabels.length - 1];
+    const url = new URL(window.location);
+    url.searchParams.delete('from');
+    url.searchParams.delete('to');
+    window.history.replaceState({}, '', url);
+    buildTimelineChart(state.fullLabels, state.fullDatasets);
+}
+
+function computeAlgorithmImpact(labels, values) {
+    if (!labels || !labels.length || !values || !values.length) return [];
+    const results = [];
+    const fourWeeksMs = 28 * 24 * 60 * 60 * 1000;
+
+    for (const event of SERP_EVENTS) {
+        const eventDate = new Date(event.date).getTime();
+        const beforeVals = [];
+        const afterVals = [];
+
+        for (let i = 0; i < labels.length; i++) {
+            if (values[i] === null) continue;
+            const labelDate = new Date(labels[i]).getTime();
+            const diff = labelDate - eventDate;
+            if (diff < 0 && diff >= -fourWeeksMs) beforeVals.push(values[i]);
+            if (diff > 0 && diff <= fourWeeksMs) afterVals.push(values[i]);
+        }
+
+        if (beforeVals.length >= 2 && afterVals.length >= 2) {
+            const avgBefore = beforeVals.reduce((a, b) => a + b, 0) / beforeVals.length;
+            const avgAfter = afterVals.reduce((a, b) => a + b, 0) / afterVals.length;
+            // Skip events where before-period traffic is too low (likely missing data, not real traffic)
+            if (avgBefore < 100 && avgAfter > avgBefore * 5) continue;
+            const impact = avgBefore > 0 ? ((avgAfter - avgBefore) / avgBefore * 100) : 0;
+            results.push({
+                name: event.name,
+                date: event.date,
+                type: event.type,
+                avgBefore: Math.round(avgBefore),
+                avgAfter: Math.round(avgAfter),
+                impact,
+            });
+        }
+    }
+
+    results.sort((a, b) => a.impact - b.impact);
+    return results;
+}
+
+function getUnifiedEngagementData() {
+    if (!state.fullLabels || !state.fullDatasets || !state.fullDatasets.length) return null;
+    // Merge all year datasets (not Trend/Events) into one unified series
+    const yearDs = state.fullDatasets.filter(ds => !ds.label.includes('Trend') && ds.label !== 'Events' && !ds.label.includes('Projected'));
+    if (!yearDs.length) return null;
+    const merged = state.fullLabels.map((_, i) => {
+        for (const ds of yearDs) {
+            if (ds.data[i] !== null && ds.data[i] !== undefined) return ds.data[i];
+        }
+        return null;
+    });
+    return { labels: state.fullLabels, values: merged };
+}
+
+function renderInsights(pages, engagement) {
+    const container = document.getElementById('insights-section');
+    const years = Object.keys(pages).map(Number).sort();
+    const bullets = [];
+
+    if (years.length >= 2) {
+        const latest = years[years.length - 1];
+        const prev = years[years.length - 2];
+        const latestTotal = annualize(pages[latest].reduce((s, p) => s + p.views, 0), latest);
+        const prevTotal = annualize(pages[prev].reduce((s, p) => s + p.views, 0), prev);
+        const pct = prevTotal > 0 ? ((latestTotal - prevTotal) / prevTotal * 100) : 0;
+        const cls = pct >= 0 ? 'pos' : 'neg';
+        const iAnn = (isPartialYear(latest) || isPartialYear(prev)) ? '<span class="ann-mark" title="Annualized: partial year projected to 365 days">*</span>' : '';
+        const verb = iAnn ? (pct >= 0 ? 'is projected to grow' : 'is projected to decline') : (pct >= 0 ? 'grew' : 'declined');
+        bullets.push(`<li class="${cls}">Overall traffic ${verb} ${Math.abs(pct).toFixed(1)}%${iAnn} from ${yearLabel(prev)} to ${yearLabel(latest)}</li>`);
+
+        const merged = {};
+        for (const y of [prev, latest]) {
+            for (const p of pages[y]) {
+                if (!merged[p.path]) merged[p.path] = {};
+                merged[p.path]['v' + y] = annualize(p.views, y);
+            }
+        }
+        let biggestLoss = null, biggestGain = null;
+        for (const [path, data] of Object.entries(merged)) {
+            const vl = data['v' + latest] || 0;
+            const vp = data['v' + prev] || 0;
+            if (vp < 100 && vl > vp * 3) continue; // new page, skip
+            if (vp <= 0) continue;
+            const diff = vl - vp;
+            const pctC = (diff / vp * 100);
+            if (!biggestLoss || diff < biggestLoss.diff) biggestLoss = { path, diff, pct: pctC };
+            if (!biggestGain || diff > biggestGain.diff) biggestGain = { path, diff, pct: pctC };
+        }
+        if (biggestLoss && biggestLoss.diff < 0) {
+            const lossVerb = iAnn ? 'is projected to lose' : 'lost';
+            bullets.push(`<li class="neg">Top declining page: ${esc(biggestLoss.path)} (${biggestLoss.pct.toFixed(1)}%${iAnn}, ${lossVerb} ${fmt(Math.abs(biggestLoss.diff))}${iAnn} views)</li>`);
+        }
+        if (biggestGain && biggestGain.diff > 0) {
+            const gainVerb = iAnn ? 'is projected to gain' : 'gained';
+            bullets.push(`<li class="pos">Top growing page: ${esc(biggestGain.path)} (+${biggestGain.pct.toFixed(1)}%${iAnn}, ${gainVerb} ${fmt(biggestGain.diff)}${iAnn} views)</li>`);
+        }
+
+        const decayCount = countDecayingPages(pages);
+        if (decayCount > 0) {
+            bullets.push(`<li class="neg">${decayCount} of your top 25 pages ${decayCount === 1 ? 'is' : 'are'} in decline</li>`);
+        }
+    }
+
+    const ed = getUnifiedEngagementData();
+    if (ed) {
+        const impacts = computeAlgorithmImpact(ed.labels, ed.values);
+        if (impacts.length && impacts[0].impact < -5) {
+            bullets.push(`<li class="neg">Largest traffic drop aligns with ${impacts[0].name} (${impacts[0].impact.toFixed(1)}% in the 4 weeks after)</li>`);
+        }
+    }
+
+    if (!bullets.length) { container.style.display = 'none'; return; }
+    container.style.display = '';
+    container.innerHTML = `<div class="section-title">Key Insights</div><div class="insights-card"><ul>${bullets.join('')}</ul></div>`;
+}
+
+function countDecayingPages(pages) {
+    const years = Object.keys(pages).map(Number).sort();
+    if (years.length < 2) return 0;
+    const latest = years[years.length - 1];
+
+    const merged = {};
+    for (const y of years) {
+        for (const p of pages[y]) {
+            if (!merged[p.path]) merged[p.path] = {};
+            merged[p.path]['v' + y] = p.views;
+        }
+    }
+
+    const sorted = Object.entries(merged)
+        .map(([path, data]) => ({ path, ...data }))
+        .sort((a, b) => (b['v' + latest] || 0) - (a['v' + latest] || 0))
+        .slice(0, 25);
+
+    let count = 0;
+    for (const row of sorted) {
+        let declining = true;
+        for (let i = 1; i < years.length; i++) {
+            if ((row['v' + years[i]] || 0) >= (row['v' + years[i - 1]] || 0)) { declining = false; break; }
+        }
+        if (declining && years.length >= 2) count++;
+    }
+    return count;
+}
+
+function renderAlgorithmImpact() {
+    const container = document.getElementById('impact-section');
+    const ed = getUnifiedEngagementData();
+    if (!ed) { container.style.display = 'none'; return; }
+
+    const impacts = computeAlgorithmImpact(ed.labels, ed.values);
+    if (!impacts.length) { container.style.display = 'none'; return; }
+
+    const formatDate = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+
+    let rows = impacts.map(e => {
+        const cls = e.impact >= 0 ? 'change-up' : 'change-down';
+        const sign = e.impact >= 0 ? '+' : '';
+        const icon = e.type === 'aio' ? '🤖' : '🔍';
+        return `<tr>
+            <td>${icon} ${esc(e.name)}</td>
+            <td>${formatDate(e.date)}</td>
+            <td class="num">${e.avgBefore.toLocaleString()}/wk</td>
+            <td class="num">${e.avgAfter.toLocaleString()}/wk</td>
+            <td class="num"><span class="${cls}"><strong>${sign}${e.impact.toFixed(1)}%</strong></span></td>
+        </tr>`;
+    }).join('');
+
+    container.style.display = '';
+    container.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between"><div class="section-title" style="margin-bottom:0">Algorithm Impact</div><button class="btn btn-secondary" style="padding:4px 10px;font-size:11px" onclick="renderAlgorithmImpact()">Refresh</button></div>
+        <div style="overflow-x:auto;border:1px solid var(--border-color);border-radius:var(--radius);box-shadow:var(--shadow-sm);margin-top:12px">
+        <table class="impact-table">
+            <thead><tr><th>Event</th><th>Date</th><th class="num">4 Wks Before</th><th class="num">4 Wks After</th><th class="num">Impact</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table></div>`;
+}
+
+function renderWinnersLosers(pages) {
+    const container = document.getElementById('winners-losers');
+    const years = Object.keys(pages).map(Number).sort();
+    if (years.length < 2) { container.style.display = 'none'; return; }
+
+    const latest = years[years.length - 1];
+    const prev = years[years.length - 2];
+
+    const merged = {};
+    for (const y of [prev, latest]) {
+        for (const p of pages[y]) {
+            if (!merged[p.path]) merged[p.path] = { path: p.path };
+            merged[p.path]['v' + y] = annualize(p.views, y);
+        }
+    }
+
+    const all = Object.values(merged)
+        .filter(r => {
+            const vp = r['v' + prev] || 0;
+            const vl = r['v' + latest] || 0;
+            if (vp < 100 && vl > vp * 3) return false; // new page, not a real winner/loser
+            return vp > 0;
+        })
+        .map(r => {
+            const vl = r['v' + latest] || 0;
+            const vp = r['v' + prev] || 0;
+            return { ...r, diff: vl - vp, pct: vp > 0 ? ((vl - vp) / vp * 100) : 0 };
+        });
+
+    const losers = all.filter(r => r.diff < 0).sort((a, b) => a.diff - b.diff).slice(0, 10);
+    const winners = all.filter(r => r.diff > 0).sort((a, b) => b.diff - a.diff).slice(0, 10);
+
+    if (!losers.length && !winners.length) { container.style.display = 'none'; return; }
+
+    const wlAnn = (isPartialYear(latest) || isPartialYear(prev)) ? '<span class="ann-mark" title="Annualized: partial year projected to 365 days">*</span>' : '';
+    const renderPanel = (title, items, cls) => {
+        const rows = items.map((r, i) => {
+            const sign = r.pct >= 0 ? '+' : '';
+            return `<div class="wl-item"><span style="color:var(--text-secondary);width:20px">${i + 1}.</span><span class="path" title="${esc(r.path)}">${esc(r.path)}</span><span class="views">${fmt(Math.abs(r.diff))}${wlAnn}</span><span class="${cls}" style="font-weight:600;white-space:nowrap">${sign}${r.pct.toFixed(1)}%${wlAnn}</span></div>`;
+        }).join('');
+        return `<div class="wl-panel"><h3>${title}</h3>${rows || '<div style="color:var(--text-secondary);font-size:13px">None</div>'}</div>`;
+    };
+
+    container.style.display = '';
+    container.innerHTML = `<div class="wl-row">${renderPanel('Top Losers', losers, 'change-down')}${renderPanel('Top Winners', winners, 'change-up')}</div>`;
+}
+
+function fmt(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+    return n.toLocaleString();
+}
+
+/* ── SESSION PERSISTENCE ── */
+function saveSession() {
+    try {
+        const data = state.files.map(f => ({
+            name: f.name, year: f.year, type: f.type, parsed: f.parsed, isDaily: f.isDaily || false, daysCovered: f.daysCovered || 365,
+            baseDate: f.baseDate ? f.baseDate.toISOString() : null,
+        }));
+        sessionStorage.setItem('ga4_analyzer_lite', JSON.stringify(data));
+    } catch (e) { /* sessionStorage full or unavailable */ }
+}
+
+function restoreSession() {
+    try {
+        const raw = sessionStorage.getItem('ga4_analyzer_lite');
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        if (!Array.isArray(data) || !data.length) return false;
+        state.files = data.map(f => ({
+            id: ++fileIdCounter,
+            name: f.name,
+            year: f.year,
+            type: f.type,
+            data: null,
+            parsed: f.parsed,
+            isDaily: f.isDaily || false,
+            daysCovered: f.daysCovered || 365,
+            baseDate: f.baseDate ? new Date(f.baseDate) : null,
+        }));
+        return true;
+    } catch (e) { return false; }
+}
+
+/* ── INIT ── */
+if (restoreSession()) {
+    onFilesChanged();
+} else {
+    document.querySelector('main').classList.add('empty-state');
+}
+    </script>
+</body>
+</html>

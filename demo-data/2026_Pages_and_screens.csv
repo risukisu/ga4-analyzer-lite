@@ -1,0 +1,57 @@
+# ----------------------------------------
+# Pages and screens: Page path and screen class
+# Account: NovaTech
+# Property: novatech.io - GA4
+# ----------------------------------------
+# 
+# All Users
+# Start date: 20260101
+# End date: 20260328
+Page path and screen class,Views,Active users,Views per active user,Average engagement time per active user,Event count,Key events,Total revenue
+/,7691,5284,1.4555,17.4616,19826,33,0
+/pricing,2245,1635,1.3731,60.7988,5866,7,0
+/about,1233,811,1.5203,24.4081,4131,5,0
+/contact,1056,670,1.5761,50.2166,4502,1,0
+/careers,1134,782,1.4501,45.6573,5456,3,0
+/demo,1375,778,1.7674,54.3412,6244,3,0
+/services/cloud-migration,462,298,1.5503,79.6556,1369,2,0
+/services/api-development,659,482,1.3672,56.3373,2490,1,0
+/services/devops-consulting,630,381,1.6535,71.9175,2985,3,0
+/services/security-audit,1160,839,1.3826,53.6500,5506,5,0
+/services/ai-integration,2967,1790,1.6575,19.1488,14371,11,0
+/services/data-engineering,592,358,1.6536,82.0900,1984,2,0
+/case-studies/fintech-platform,421,235,1.7915,61.9944,1356,2,0
+/case-studies/ecommerce-scale,264,177,1.4915,69.0078,833,0,0
+/case-studies/healthcare-api,417,306,1.3627,34.9302,2063,1,0
+/case-studies/retail-analytics,107,79,1.3544,82.7068,379,0,0
+/docs,1617,1083,1.4931,81.7627,5169,8,0
+/docs/getting-started,1267,796,1.5917,23.3505,4210,1,0
+/docs/authentication,815,541,1.5065,40.8109,2835,1,0
+/docs/api-reference,3475,2601,1.3360,36.4046,10774,12,0
+/docs/webhooks,371,244,1.5205,52.9012,1180,1,0
+/docs/sdks,844,608,1.3882,37.3060,2866,0,0
+/docs/deployment-guide,270,149,1.8121,24.2144,957,1,0
+/docs/troubleshooting,518,324,1.5988,71.8747,2312,1,0
+/docs/changelog,610,356,1.7135,61.1840,1912,0,0
+/blog/introduction-to-kubernetes,311,231,1.3463,23.6303,1228,1,0
+/blog/rest-api-best-practices,513,353,1.4533,27.5497,2322,1,0
+/blog/docker-compose-tutorial,10,6,1.6667,58.0087,29,0,0
+/blog/jwt-authentication-guide,636,432,1.4722,42.6179,2200,0,0
+/blog/microservices-architecture,377,253,1.4901,47.5436,1271,2,0
+/blog/aws-lambda-serverless,526,391,1.3453,72.1576,1959,2,0
+/blog/ci-cd-pipeline-guide,643,391,1.6445,87.7420,1725,1,0
+/blog/postgresql-performance,244,154,1.5844,49.9084,721,1,0
+/blog/react-hooks-guide,72,52,1.3846,62.6882,268,0,0
+/blog/terraform-iac,490,296,1.6554,42.0235,2303,0,0
+/blog/graphql-vs-rest,338,189,1.7884,79.4939,1647,1,0
+/blog/llm-integration-production,3112,2135,1.4576,24.7972,13522,14,0
+/blog/vector-databases-explained,1720,1020,1.6863,52.6768,6663,1,0
+/blog/prompt-engineering-guide,2120,1189,1.7830,60.9812,9395,7,0
+/blog/rag-architecture-patterns,2037,1262,1.6141,22.0823,5853,8,0
+/blog/ai-agent-frameworks,1505,1061,1.4185,51.6934,5690,1,0
+/blog/fine-tuning-llms,1476,1089,1.3554,61.7218,7262,7,0
+/blog/openai-api-optimization,1850,1185,1.5612,61.5554,6768,8,0
+/blog/zero-trust-security,1471,1026,1.4337,29.6511,6423,7,0
+/resources/ebooks,274,198,1.3838,54.1747,874,1,0
+/resources/webinars,127,84,1.5119,70.5700,621,0,0
+/resources/whitepapers,136,93,1.4624,85.8957,668,0,0
