@@ -32,7 +32,11 @@
 ╚══════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚══════╝
 ```
 
-A single HTML file that turns your Google Analytics 4 CSV exports into an interactive traffic analysis dashboard. 
+![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)
+![Single File](https://img.shields.io/badge/single%20file-1%2C517%20lines-green)
+![No Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)
+
+A single HTML file that turns your Google Analytics 4 CSV exports into an interactive traffic analysis dashboard.
 No install, no server, no dependencies — just open in a browser and drop your files.
 
 ## Screenshots
