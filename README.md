@@ -28,6 +28,8 @@ No install, no server, no dependencies — just open in a browser and drop your 
 
 ## Screenshots
 
+[![CANDOR: copilot](https://img.shields.io/badge/%E4%B7%BC%20CANDOR-copilot-fee2e2?labelColor=fee2e2)](https://candor.md)
+
 ![Overview — KPI cards, key insights, and traffic timeline](screenshots/overview.jpeg)
 ![Algorithm impact analysis and top losers/winners](screenshots/algorithm-impact.jpeg)
 ![Top pages table with per-year views and YoY change](screenshots/top-pages.jpeg)
@@ -146,3 +148,7 @@ Drop all 6 files from `demo-data/` to see the full dashboard.
 ## License
 
 PolyForm Noncommercial 1.0.0 — free for personal and noncommercial use. For commercial licensing, contact the author.
+
+---
+
+Built with [Claude Code](https://claude.ai/code) as copilot. [CANDOR: copilot](https://candor.md) — AI writes the code, I make the decisions.
