@@ -1,6 +1,4 @@
-![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)
-![Single File](https://img.shields.io/badge/single%20file-1%2C517%20lines-green)
-![No Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
 ![CANDOR: copilot](https://img.shields.io/badge/䷼%20CANDOR-copilot-fee2e2?labelColor=fee2e2)
 
 ```
