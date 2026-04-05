@@ -1,5 +1,5 @@
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![CANDOR: copilot](https://img.shields.io/badge/䷼%20CANDOR-copilot-fee2e2?labelColor=fee2e2)
+[![CANDOR: copilot](https://img.shields.io/badge/䷼%20CANDOR-copilot-fee2e2?labelColor=fee2e2)](https://github.com/DimwitLabs/CANDOR.md)
 
 ```
                                                           ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣟⡄
@@ -148,4 +148,4 @@ PolyForm Noncommercial 1.0.0 — free for personal and noncommercial use. For co
 
 ---
 
-Built with [Claude Code](https://claude.ai/code) as copilot. [CANDOR: copilot](https://candor.md) — AI writes the code, I make the decisions.
+Built with [Claude Code](https://claude.ai/code) as copilot. [CANDOR: copilot](https://github.com/DimwitLabs/CANDOR.md) — AI writes the code, I make the decisions.
