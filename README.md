@@ -144,7 +144,7 @@ Drop all 6 files from `demo-data/` to see the full dashboard.
 
 ## License
 
-PolyForm Noncommercial 1.0.0 — free for personal and noncommercial use. For commercial licensing, contact the author.
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
