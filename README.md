@@ -1,3 +1,8 @@
+![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)
+![Single File](https://img.shields.io/badge/single%20file-1%2C517%20lines-green)
+![No Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)
+![CANDOR: copilot](https://img.shields.io/badge/䷼%20CANDOR-copilot-fee2e2?labelColor=fee2e2)
+
 ```
                                                           ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣟⡄
                                                           ⠀⠀⠀⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡞⡏⡇
@@ -19,16 +24,10 @@
                                                           ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠉
 ```
 
-![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)
-![Single File](https://img.shields.io/badge/single%20file-1%2C517%20lines-green)
-![No Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)
-
 A single HTML file that turns your Google Analytics 4 CSV exports into an interactive traffic analysis dashboard.
 No install, no server, no dependencies — just open in a browser and drop your files.
 
 ## Screenshots
-
-[![CANDOR: copilot](https://img.shields.io/badge/%E4%B7%BC%20CANDOR-copilot-fee2e2?labelColor=fee2e2)](https://candor.md)
 
 ![Overview — KPI cards, key insights, and traffic timeline](screenshots/overview.jpeg)
 ![Algorithm impact analysis and top losers/winners](screenshots/algorithm-impact.jpeg)
